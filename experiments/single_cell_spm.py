@@ -85,12 +85,20 @@ def main() -> None:
     discharge_capacity = as_vector(
         get_variable(solution, "Discharge capacity [A.h]"), len(time_s)
     )
-    soc = initial_soc - discharge_capacity / nominal_capacity
 
     voltage = as_vector(
         get_variable(solution, "Voltage [V]", "Terminal voltage [V]"), len(time_s)
     )
     current = as_vector(get_variable(solution, "Current [A]"), len(time_s))
+
+    # The PyBaMM discharge-capacity variable is cumulative and does not undo
+    # capacity during a later charge step. For this mixed current profile, use
+    # signed coulomb counting so SOC rises during charging as it should.
+    delta_t = np.diff(time_s)
+    signed_capacity_change = np.concatenate(
+        ([0.0], np.cumsum(0.5 * (current[1:] + current[:-1]) * delta_t / 3600.0))
+    )
+    soc = initial_soc - signed_capacity_change / nominal_capacity
     neg_avg = as_vector(
         get_variable(
         solution,
