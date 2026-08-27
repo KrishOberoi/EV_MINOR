@@ -64,6 +64,9 @@ def run_controller(reference: pd.DataFrame, controller: str) -> pd.DataFrame:
     soc_scale = 0.02
 
     for k, time in enumerate(time_s):
+        step_dt = (
+            time_s[k + 1] - time_s[k] if k < n_steps - 1 else 0.0
+        )
         base_current = np.array([base[cell].current_A.iloc[k] for cell in cells])
         base_voltage = np.array([base[cell].voltage_V.iloc[k] for cell in cells])
         base_soc = np.array([base[cell].soc.iloc[k] for cell in cells])
@@ -101,7 +104,7 @@ def run_controller(reference: pd.DataFrame, controller: str) -> pd.DataFrame:
             balance_events += 1
         total_updates += 1
         cell_current = base_current + balancing_current
-        balance_energy_wh += np.sum(np.abs(balancing_current) * voltage) * DT_S / 3600.0
+        balance_energy_wh += np.sum(np.abs(balancing_current) * voltage) * step_dt / 3600.0
 
         for i, cell in enumerate(cells):
             records.append(
@@ -124,11 +127,11 @@ def run_controller(reference: pd.DataFrame, controller: str) -> pd.DataFrame:
         # cost representative of a reduced-order controller model.
         if k < n_steps - 1:
             for i, config in enumerate(CELL_CONFIG):
-                state_soc[i] -= cell_current[i] * DT_S / (3600.0 * config["capacity_ah"])
-            extra_positive_gradient += DT_S * (
+                state_soc[i] -= cell_current[i] * step_dt / (3600.0 * config["capacity_ah"])
+            extra_positive_gradient += step_dt * (
                 -extra_positive_gradient / 180.0 + 25.0 * balancing_current
             )
-            extra_eta += DT_S * (
+            extra_eta += step_dt * (
                 -extra_eta / 80.0 + 0.0005 * balancing_current
             )
 
