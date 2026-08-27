@@ -221,17 +221,17 @@ The controller layer applied additional currents `u_i` such that the ideal trans
 
 | Controller | Final SOC spread [percentage points] | Final voltage spread [mV] | Balancing energy [Wh] | Events |
 |---|---:|---:|---:|---:|
-| Uncontrolled | 9.609 | 75.671 | 0.000 | 0 |
-| Voltage | 2.747 | **4.981** | 1.521 | 288 |
-| SOC | **0.734** | 23.584 | 1.917 | 364 |
-| Electrochemical | 0.889 | 26.469 | 1.917 | 364 |
+| Uncontrolled | 9.596 | 75.538 | 0.000 | 0 |
+| Voltage | 2.734 | **4.369** | 1.521 | 290 |
+| SOC | **0.769** | 23.866 | 1.897 | 364 |
+| Electrochemical | 0.927 | 27.288 | 1.897 | 364 |
 
 ### Observations
 
-- All active controllers reduced the final SOC spread relative to the 9.609 percentage-point uncontrolled case.
+- All active controllers reduced the final SOC spread relative to the 9.596 percentage-point uncontrolled case.
 - Voltage control produced the smallest final voltage spread, which is expected because voltage was its direct feedback variable.
 - SOC control produced the smallest final SOC spread.
-- The electrochemical controller produced a final SOC spread close to the SOC controller while using the same ideal balancing-energy budget in this first tuning.
+- The electrochemical controller produced a final SOC spread close to the SOC controller while using nearly the same ideal balancing-energy budget in this first tuning.
 
 ### Interpretation and limitation
 
@@ -241,6 +241,32 @@ This is a control-oriented reduced-order comparison, not yet a closed-loop re-so
 
 The initial comparison shows the expected multi-objective trade-off: voltage control is best at suppressing voltage spread, SOC control is best at equalizing SOC, and the electrochemical controller provides a physically informed compromise. This supports the report's objective of comparing balancing decisions using more than a single terminal-voltage threshold.
 
+## Research novelty and cross-verification position
+
+### Literature check
+
+The project does not claim that active balancing, SOC-based balancing, MPC, or degradation-aware balancing is individually novel. Prior work already covers optimization-based active balancing, aging-aware or wear-leveling-aware balancing, and State-of-Power-based balancing. In particular, Fraccaroli et al. study aging-aware active balancing and balancing triggers, while Shreasth et al. (Scientific Reports, 2025) study a SoP-based strategy using a four-cell experiment, UKF estimation, MATLAB/Simulink, and a 96-series architecture.
+
+### Defensible contribution
+
+The defensible contribution is an integrated and reproducible simulation framework that combines SPM particle-state signals, controlled same-SOC history experiments, heterogeneous four-cell balancing comparisons, and a planned degradation-aware and event-triggered hierarchy. This is an integration and evaluation contribution unless a deeper literature review establishes a narrower algorithmic difference.
+
+### Cross-verification completed
+
+An independent verification script, `experiments/verify_pack_invariants.py`, recomputes checks from the saved CSV files rather than calling the simulation functions. It verified:
+
+- Common external current through the series cells.
+- Pack voltage equal to the sum of cell voltages.
+- Zero net ideal balancing current at every time point.
+- Correct decomposition `cell current = pack current + balancing current`.
+- SOC propagation from the applied cell current and capacity.
+- Reconstruction of the reported final SOC and voltage spread metrics.
+- Non-missing and finite output data.
+
+### Remaining verification
+
+The controller comparison currently uses a control-oriented perturbation layer calibrated against PyBaMM reference trajectories. It must next be cross-checked against full-state PyBaMM stepping or a formally derived reduced-order observer. We also need SPM-versus-SPMe comparison, timestep sensitivity, controller ablations, and repeated parameter scenarios before making a general performance or novelty claim.
+
 
 | Date | Experiment | Result | Decision |
 |---|---|---|---|
@@ -249,4 +275,5 @@ The initial comparison shows the expected multi-objective trade-off: voltage con
 | 2026-08-27 | Experiment 1 full-state energy continuation | 3.068 Wh usable-energy difference under a common 5 A discharge | Proceed to controlled same-SOC history comparison |
 | 2026-08-27 | Experiment 1b controlled same-SOC history comparison | 0.568 mV voltage difference and 0.556 percentage-point SOC difference with a 480.77 mol m^-3 positive-particle gradient difference | Proceed to 4-cell heterogeneous pack and balancing controllers |
 | 2026-08-27 | Four-cell heterogeneous pack baseline | 90.71 mV peak voltage spread and 9.60 percentage-point final SOC spread before balancing | Implement baseline balancing controllers |
-| 2026-08-27 | First balancing-controller comparison | Voltage control reached 4.981 mV final voltage spread; SOC control reached 0.734 percentage-point final SOC spread; electrochemical control reached 0.889 percentage-point final SOC spread | Refine controller with explicit observer and full-state feedback |
+| 2026-08-27 | First balancing-controller comparison | Voltage control reached 4.369 mV final voltage spread; SOC control reached 0.769 percentage-point final SOC spread; electrochemical control reached 0.927 percentage-point final SOC spread | Refine controller with explicit observer and full-state feedback |
+| 2026-08-27 | Independent pack/controller invariant verification | Common current, pack-voltage summation, zero-net transfer, current decomposition, SOC propagation, and metric reconstruction all passed | Proceed to full-state observer cross-check |
