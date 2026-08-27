@@ -204,6 +204,43 @@ The series pack is constrained by the weakest cell. Without balancing, the initi
 
 This is a pack-level aggregation of independently solved SPM cells, not yet a power-electronics simulation. The pack current is common to all cells, while balancing currents and converter losses will be added in the next controller stage. Thermal coupling, tab-level effects, and series-parallel topology are intentionally outside this baseline.
 
+## First balancing-controller comparison
+
+### Method
+
+The four-cell baseline was used as a common reference trajectory. Three controllers were compared with an uncontrolled case:
+
+- **Uncontrolled:** no balancing current.
+- **Voltage:** transfer 0.25 A from the highest-voltage cell to the lowest-voltage cell when the voltage range exceeded 5 mV.
+- **SOC:** transfer 0.25 A from the highest-SOC cell to the lowest-SOC cell when the SOC range exceeded 0.5 percentage points.
+- **Electrochemical:** select donor and receiver using a normalized score combining SOC, positive-particle surface-average gradient, and total overpotential.
+
+The controller layer applied additional currents `u_i` such that the ideal transfer satisfied `sum(u_i) = 0`. The same pack current, initial conditions, and cell parameters were used for every controller.
+
+### Results
+
+| Controller | Final SOC spread [percentage points] | Final voltage spread [mV] | Balancing energy [Wh] | Events |
+|---|---:|---:|---:|---:|
+| Uncontrolled | 9.609 | 75.671 | 0.000 | 0 |
+| Voltage | 2.747 | **4.981** | 1.521 | 288 |
+| SOC | **0.734** | 23.584 | 1.917 | 364 |
+| Electrochemical | 0.889 | 26.469 | 1.917 | 364 |
+
+### Observations
+
+- All active controllers reduced the final SOC spread relative to the 9.609 percentage-point uncontrolled case.
+- Voltage control produced the smallest final voltage spread, which is expected because voltage was its direct feedback variable.
+- SOC control produced the smallest final SOC spread.
+- The electrochemical controller produced a final SOC spread close to the SOC controller while using the same ideal balancing-energy budget in this first tuning.
+
+### Interpretation and limitation
+
+This is a control-oriented reduced-order comparison, not yet a closed-loop re-solve of the full PyBaMM PDE state after every balancing-current action. The PyBaMM pack trajectories provide the reference electrochemical signals, while a first-order perturbation model propagates the effect of `u_i` on SOC, gradient, and overpotential. Therefore, the table demonstrates controller architecture and metric definitions, but it should not yet be presented as definitive proof that the electrochemical controller is superior. The next refinement is to connect the controller to full-state PyBaMM stepping or to a formally derived reduced-order observer.
+
+### Research conclusion
+
+The initial comparison shows the expected multi-objective trade-off: voltage control is best at suppressing voltage spread, SOC control is best at equalizing SOC, and the electrochemical controller provides a physically informed compromise. This supports the report's objective of comparing balancing decisions using more than a single terminal-voltage threshold.
+
 
 | Date | Experiment | Result | Decision |
 |---|---|---|---|
@@ -212,3 +249,4 @@ This is a pack-level aggregation of independently solved SPM cells, not yet a po
 | 2026-08-27 | Experiment 1 full-state energy continuation | 3.068 Wh usable-energy difference under a common 5 A discharge | Proceed to controlled same-SOC history comparison |
 | 2026-08-27 | Experiment 1b controlled same-SOC history comparison | 0.568 mV voltage difference and 0.556 percentage-point SOC difference with a 480.77 mol m^-3 positive-particle gradient difference | Proceed to 4-cell heterogeneous pack and balancing controllers |
 | 2026-08-27 | Four-cell heterogeneous pack baseline | 90.71 mV peak voltage spread and 9.60 percentage-point final SOC spread before balancing | Implement baseline balancing controllers |
+| 2026-08-27 | First balancing-controller comparison | Voltage control reached 4.981 mV final voltage spread; SOC control reached 0.734 percentage-point final SOC spread; electrochemical control reached 0.889 percentage-point final SOC spread | Refine controller with explicit observer and full-state feedback |
