@@ -29,6 +29,12 @@ python experiments/experiment_1b_equal_soc_history.py
 
 This controlled experiment keeps initial SOC and total discharge equal while changing pulse order, helping isolate electrochemical memory from SOC imbalance.
 
+```bash
+python experiments/four_cell_pack.py
+```
+
+This builds a four-series heterogeneous pack with a common series current and records the pre-balancing voltage and SOC spread.
+
 The running report is maintained in `REPORT.md`. The requirements comparison with the submitted minor-project document is maintained in `ALIGNMENT.md`.
 
 

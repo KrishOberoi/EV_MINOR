@@ -166,6 +166,44 @@ This controlled result strengthens the case for including electrochemical state 
 
 The result comes from one pair of current-history orderings and one SPM parameter set. A stronger study should repeat the search over multiple pulse amplitudes, rest times, and initial SOC values, then report distributions rather than one selected pair.
 
+## Four-cell heterogeneous pack baseline
+
+### Method
+
+A four-series pack was assembled from four independent isothermal Chen2020 SPM simulations. Because series-connected cells carry the same physical current, every cell was driven by the same absolute current profile rather than a cell-specific C-rate:
+
+1. Discharge at 2.5 A for 20 minutes
+2. Rest for 10 minutes
+3. Discharge at 1.25 A for 20 minutes
+4. Rest for 10 minutes
+
+The cells were intentionally heterogeneous:
+
+| Cell | Initial SOC | Capacity | Contact resistance |
+|---|---:|---:|---:|
+| Cell 1 | 80% | 5.00 Ah | 12 mOhm |
+| Cell 2 | 76% | 4.90 Ah | 15 mOhm |
+| Cell 3 | 72% | 4.70 Ah | 22 mOhm |
+| Cell 4 | 78% | 4.95 Ah | 10 mOhm |
+
+Cell 3 represents the weakest or most aged cell in this baseline configuration.
+
+### Baseline result before balancing
+
+- Peak cell-voltage spread: **90.71 mV** at 12.5 minutes.
+- Final cell-SOC spread: **9.60 percentage points**.
+- Final pack voltage: **15.079 V**.
+- Final cell voltages ranged from 3.727 V to 3.803 V.
+- Cell 3 finished with the lowest SOC, lowest voltage, and highest contact resistance.
+
+### Observation
+
+The series pack is constrained by the weakest cell. Without balancing, the initial SOC and parameter mismatch accumulates into a voltage and SOC spread during the common-current drive cycle. This gives us a quantitative pre-balancing baseline against which voltage-, SOC-, and electrochemical-state balancing can be compared.
+
+### Modelling limitation
+
+This is a pack-level aggregation of independently solved SPM cells, not yet a power-electronics simulation. The pack current is common to all cells, while balancing currents and converter losses will be added in the next controller stage. Thermal coupling, tab-level effects, and series-parallel topology are intentionally outside this baseline.
+
 
 | Date | Experiment | Result | Decision |
 |---|---|---|---|
@@ -173,3 +211,4 @@ The result comes from one pair of current-history orderings and one SPM paramete
 | 2026-08-27 | Experiment 1 voltage-state comparison | 1.848 mV voltage difference with 16.94 percentage-point SOC difference | Proceed to full-state usable-energy comparison |
 | 2026-08-27 | Experiment 1 full-state energy continuation | 3.068 Wh usable-energy difference under a common 5 A discharge | Proceed to controlled same-SOC history comparison |
 | 2026-08-27 | Experiment 1b controlled same-SOC history comparison | 0.568 mV voltage difference and 0.556 percentage-point SOC difference with a 480.77 mol m^-3 positive-particle gradient difference | Proceed to 4-cell heterogeneous pack and balancing controllers |
+| 2026-08-27 | Four-cell heterogeneous pack baseline | 90.71 mV peak voltage spread and 9.60 percentage-point final SOC spread before balancing | Implement baseline balancing controllers |
