@@ -35,7 +35,7 @@ python experiments/four_cell_pack.py
 
 This builds a four-series heterogeneous pack with a common series current and records the pre-balancing voltage and SOC spread.
 
-The running report is maintained in `REPORT.md`. The requirements comparison with the submitted minor-project document is maintained in `ALIGNMENT.md`.
+The running report is maintained in `REPORT.md`. The requirements comparison with the submitted minor-project document is maintained in `ALIGNMENT.md`. The staged research and evidence policy is maintained in `RESEARCH_WORKFLOW.md`.
 
 
 - `results/csv/single_cell_spm_timeseries.csv`
