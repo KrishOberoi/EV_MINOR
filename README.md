@@ -23,7 +23,11 @@ python experiments/experiment_1_same_voltage.py
 
 Experiment 1 simulates two cells with different histories, finds a pair within a 2 mV voltage threshold, preserves their full electrochemical states, and compares their usable discharge energy under a common load.
 
-The running report is maintained in `REPORT.md`.
+```bash
+python experiments/experiment_1b_equal_soc_history.py
+```
+
+This controlled experiment keeps initial SOC and total discharge equal while changing pulse order, helping isolate electrochemical memory from SOC imbalance.
 
 The Step 1 script writes:
 

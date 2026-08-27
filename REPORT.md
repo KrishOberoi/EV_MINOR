@@ -134,10 +134,42 @@ The complete Experiment 1 evidence is now:
 
 Under the stated Chen2020 SPM assumptions and selected histories, a 1.848 mV pre-load voltage difference corresponded to a 3.068 Wh difference in subsequent usable energy under a common 5 A discharge. Because SOC was also different, this is a project-specific demonstration of the limitation of voltage-only classification, not an isolated measurement of diffusion-gradient effects.
 
-## Updated experiment log
+## Controlled Experiment 1B: same SOC, different history
+
+### Motivation
+
+The first energy comparison demonstrated a practical consequence but the selected cells differed substantially in SOC. To separate SOC imbalance from electrochemical memory, both cells were initialized at 60% SOC and given the same total discharge. Only the ordering of the high- and low-rate current segments was changed.
+
+### Result
+
+The analysis searched for a pair satisfying both a voltage difference below 2 mV and an SOC difference below 1 percentage point.
+
+| Quantity | Cell A | Cell B | Difference |
+|---|---:|---:|---:|
+| Terminal voltage | 3.593880 V | 3.594447 V | **0.568 mV** |
+| SOC | 50.278% | 49.722% | **0.556 percentage points** |
+| Negative surface-average gradient | -720.73 mol m^-3 | -751.40 mol m^-3 | 30.67 mol m^-3 |
+| Positive surface-average gradient | 4691.40 mol m^-3 | 4210.64 mol m^-3 | **480.77 mol m^-3** |
+| Total overpotential | -91.43 mV | -91.47 mV | 0.04 mV |
+
+The matched points occurred at 6.83 minutes for Cell A and 12.17 minutes for Cell B. The cells had identical model parameters and equal initial SOC, but their current histories were ordered differently.
+
+### Observation
+
+Even after controlling SOC to within 0.556 percentage points and voltage to 0.568 mV, the positive-particle surface-average concentration gradients remained different by approximately 481 mol m^-3. This shows that recent current history can leave a measurable internal diffusion state difference that is not represented by voltage or SOC alone.
+
+### Conclusion
+
+This controlled result strengthens the case for including electrochemical state variables in a balancing decision. It is a cleaner demonstration than the original pair because SOC is approximately equal. The difference is smaller than in the unconstrained experiment, so the report should present it as supporting evidence rather than claiming that voltage is always inadequate by a fixed amount.
+
+### Limitation
+
+The result comes from one pair of current-history orderings and one SPM parameter set. A stronger study should repeat the search over multiple pulse amplitudes, rest times, and initial SOC values, then report distributions rather than one selected pair.
+
 
 | Date | Experiment | Result | Decision |
 |---|---|---|---|
 | 2026-08-26 | Single-cell SPM baseline | Successful, 456 points, no missing CSV values | Proceed to two-cell history comparison |
 | 2026-08-27 | Experiment 1 voltage-state comparison | 1.848 mV voltage difference with 16.94 percentage-point SOC difference | Proceed to full-state usable-energy comparison |
-| 2026-08-27 | Experiment 1 full-state energy continuation | 3.068 Wh usable-energy difference under a common 5 A discharge | Proceed to controlled same-SOC history comparison or 4-cell pack model |
+| 2026-08-27 | Experiment 1 full-state energy continuation | 3.068 Wh usable-energy difference under a common 5 A discharge | Proceed to controlled same-SOC history comparison |
+| 2026-08-27 | Experiment 1b controlled same-SOC history comparison | 0.568 mV voltage difference and 0.556 percentage-point SOC difference with a 480.77 mol m^-3 positive-particle gradient difference | Proceed to 4-cell heterogeneous pack and balancing controllers |
