@@ -6,9 +6,10 @@ The project investigates electrochemical-state- and degradation-informed active 
 
 ## Status
 
-- **Step 1 complete:** single-cell isothermal Single Particle Model (SPM) baseline in PyBaMM.
-- **Step 2 next:** two cells with different current histories and a search for nearly equal terminal voltage with different internal states.
-- 4-cell balancing, degradation-aware control, and scalability analysis are not implemented yet.
+- **Single-cell and hidden-state experiments complete:** isothermal SPM baselines in PyBaMM, including uncontrolled and controlled same-SOC history comparisons.
+- **4-cell baseline and first controller comparison complete:** heterogeneous pack, voltage/SOC/electrochemical-state controller baselines, and independent invariant checks are available.
+- **Observer cross-check complete at prototype level:** an SPM-inspired voltage/current observer and SPM-versus-SPMe comparison are documented.
+- **Next:** held-out observer testing, degradation-aware balancing, and hierarchical/event-triggered computation.
 
 ## Step 1 method
 
@@ -299,6 +300,18 @@ This quantifies the approximation introduced by selecting SPM instead of SPMe fo
 
 The first-order observer coefficients were calibrated from the SPM reference trajectory before testing. This is a useful prototype and a transparent baseline, but it is not a fully independent validation. The next observer version should use coefficients identified from separate training profiles and be tested on unseen profiles. A formally derived EKF or UKF should be treated as future work rather than claimed here.
 
+## MATLAB cross-validation lane
+
+MATLAB was added as a supplementary analysis environment rather than as a duplicate full electrochemical solver. The Python/PyBaMM SPM remains the reference implementation because it directly provides the particle concentration and electrochemical variables required by the research objectives.
+
+The `matlab/` directory contains three scripts:
+
+1. `validate_saved_results.m` independently recomputes pack and controller invariants from the committed CSV files.
+2. `plot_saved_results.m` recreates pack and controller figures from the saved outputs.
+3. `run_reduced_pack_simulation.m` runs a transparent four-cell Thevenin 1-RC model with the same initial heterogeneity and current profile as the Python pack baseline.
+
+The reduced-order MATLAB model is a control-oriented sanity simulation, not an independent SPM, DFN, or degradation validation. Its values must therefore be reported separately from the PyBaMM values. MATLAB is not installed in the current development environment, so these scripts are prepared for execution on a MATLAB-equipped machine and are currently marked as pending execution. The first MATLAB run should check qualitative ordering and conservation before any parameter calibration or quantitative cross-model comparison is attempted.
+
 
 | Date | Experiment | Result | Decision |
 |---|---|---|---|
@@ -310,3 +323,4 @@ The first-order observer coefficients were calibrated from the SPM reference tra
 | 2026-08-27 | First balancing-controller comparison | Voltage control reached 4.369 mV final voltage spread; SOC control reached 0.769 percentage-point final SOC spread; electrochemical control reached 0.927 percentage-point final SOC spread | Refine controller with explicit observer and full-state feedback |
 | 2026-08-27 | Independent pack/controller invariant verification | Common current, pack-voltage summation, zero-net transfer, current decomposition, SOC propagation, and metric reconstruction all passed | Proceed to full-state observer cross-check |
 | 2026-08-27 | SPM-inspired observer and SPM/SPMe cross-check | Observer SOC RMSE 3.185 percentage points; SPM-SPMe voltage RMSE 34.02 mV; all outputs finite | Use held-out profiles and improve observer before final controller claims |
+| 2026-08-27 | MATLAB cross-validation lane | Added independent CSV checks, plotting, and a transparent 1-RC pack sanity model; MATLAB execution pending local availability | Run on MATLAB-equipped machine and keep model-source labels separate |

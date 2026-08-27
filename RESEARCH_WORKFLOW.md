@@ -42,7 +42,8 @@ The current voltage-matched experiments are model-based engineering demonstratio
 | Full-state energy continuation | Does the hidden state produce different usable energy under common load? | Complete, with SOC confounding documented |
 | Controlled same-SOC histories | Does history still change internal state when SOC is nearly equal? | Complete, supporting evidence |
 | Heterogeneous 4S pack | Does cell mismatch create pack-level voltage and SOC spread? | Complete, pre-balancing baseline |
-| Balancing comparison | Which controller reduces imbalance most effectively? | Next |
+| Balancing comparison | Which controller reduces imbalance most effectively? | Complete baseline, further repeated scenarios required |
+| MATLAB cross-check lane | Can saved invariants and pack-level trends be checked in a second environment? | Scripts added, execution pending MATLAB availability |
 | Degradation-aware balancing | Can balancing reduce ageing cost as well as imbalance? | Planned |
 | Hierarchical computation | Can the approach scale with event-triggered updates? | Planned |
 
