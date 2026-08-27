@@ -267,6 +267,38 @@ An independent verification script, `experiments/verify_pack_invariants.py`, rec
 
 The controller comparison currently uses a control-oriented perturbation layer calibrated against PyBaMM reference trajectories. It must next be cross-checked against full-state PyBaMM stepping or a formally derived reduced-order observer. We also need SPM-versus-SPMe comparison, timestep sensitivity, controller ablations, and repeated parameter scenarios before making a general performance or novelty claim.
 
+## Observer and model-family cross-validation
+
+### Observer method
+
+An explicit SPM-inspired observer was added in `experiments/observer_cross_validation.py`. It uses only terminal voltage and current as online measurements. Its state consists of SOC, negative and positive particle surface-average concentration gradients, and an effective voltage-drop state. Prediction uses coulomb counting and first-order state propagation. A voltage residual then corrects the predicted states.
+
+The observer was initialized with a deliberately biased SOC of 65% while the SPM reference started at 70%. A 2 mV Gaussian voltage noise sequence was applied using a fixed random seed.
+
+### Observer result
+
+| Metric | Result |
+|---|---:|
+| SOC RMSE | 0.03185 fraction, or 3.185 percentage points |
+| Voltage RMSE | 14.24 mV |
+| Positive-gradient RMSE | 273.37 mol m^-3 |
+| Effective voltage-drop RMSE | 24.92 mV |
+
+The observer remains bounded between 17.62% and 64.98% SOC in this test and provides a usable first observer baseline. Its concentration estimate is less accurate than its SOC estimate, which is expected because terminal voltage does not uniquely identify the full particle concentration profile.
+
+### SPM versus SPMe result
+
+The same current profile and initial SOC were simulated with both PyBaMM SPM and SPMe models:
+
+- Voltage RMSE: **34.02 mV**.
+- Maximum voltage difference: **56.74 mV**.
+
+This quantifies the approximation introduced by selecting SPM instead of SPMe for the rapid project study. It also reinforces that the SPM results should not be described as universally valid at all C-rates.
+
+### Validation limitation
+
+The first-order observer coefficients were calibrated from the SPM reference trajectory before testing. This is a useful prototype and a transparent baseline, but it is not a fully independent validation. The next observer version should use coefficients identified from separate training profiles and be tested on unseen profiles. A formally derived EKF or UKF should be treated as future work rather than claimed here.
+
 
 | Date | Experiment | Result | Decision |
 |---|---|---|---|
@@ -277,3 +309,4 @@ The controller comparison currently uses a control-oriented perturbation layer c
 | 2026-08-27 | Four-cell heterogeneous pack baseline | 90.71 mV peak voltage spread and 9.60 percentage-point final SOC spread before balancing | Implement baseline balancing controllers |
 | 2026-08-27 | First balancing-controller comparison | Voltage control reached 4.369 mV final voltage spread; SOC control reached 0.769 percentage-point final SOC spread; electrochemical control reached 0.927 percentage-point final SOC spread | Refine controller with explicit observer and full-state feedback |
 | 2026-08-27 | Independent pack/controller invariant verification | Common current, pack-voltage summation, zero-net transfer, current decomposition, SOC propagation, and metric reconstruction all passed | Proceed to full-state observer cross-check |
+| 2026-08-27 | SPM-inspired observer and SPM/SPMe cross-check | Observer SOC RMSE 3.185 percentage points; SPM-SPMe voltage RMSE 34.02 mV; all outputs finite | Use held-out profiles and improve observer before final controller claims |

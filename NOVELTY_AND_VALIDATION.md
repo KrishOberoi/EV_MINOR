@@ -83,6 +83,13 @@ The final report should compare the proposed framework against the criteria used
 - Objective: imbalance, usable capacity, energy loss, aging, computation, or a combination.
 - Validation: simulation only, independent model, hardware, or real pack.
 
-## Current conclusion
+
+## Verification results added on 2026-08-27
+
+- Independent pack/controller invariant checks passed after correcting a PyBaMM cycle-boundary timestep issue.
+- The explicit observer was tested with a 5 percentage-point initial SOC bias and 2 mV seeded voltage noise.
+- Observer SOC RMSE was 3.185 percentage points and observer voltage RMSE was 14.24 mV.
+- SPM versus SPMe voltage RMSE was 34.02 mV and maximum difference was 56.74 mV.
+- The observer coefficients were calibrated on the same reference trajectory, so this is a baseline cross-check rather than held-out validation. Held-out profiles remain required.
 
 The project is aligned with a real research gap, but its novelty is currently in the **integration, controlled evaluation, and reproducibility** rather than a proven entirely new balancing principle. We will narrow or revise the claim if literature or cross-validation shows that the same score and architecture already exist.

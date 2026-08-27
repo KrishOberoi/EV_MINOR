@@ -1,0 +1,7 @@
+metric,value,units
+Observer SOC RMSE,0.03185018034822692,fraction
+Observer voltage RMSE,0.014242273681872591,V
+Observer positive-gradient RMSE,273.37427993077205,mol m^-3
+Observer polarization-drop RMSE,0.024920588451569307,V
+SPM-SPMe voltage RMSE,0.034020190693266825,V
+SPM-SPMe maximum voltage difference,0.05674232419857894,V

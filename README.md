@@ -41,10 +41,22 @@ python experiments/balancing_comparison.py
 
 This compares uncontrolled, voltage-based, SOC-based, and electrochemical-state balancing using a control-oriented reduced-order perturbation layer calibrated against the PyBaMM pack reference.
 
+```bash
+python experiments/observer_cross_validation.py
+```
+
+This validates the explicit SPM-inspired voltage/current observer against PyBaMM SPM truth and compares SPM voltage against SPMe on the same profile.
+
 
 
 - `results/csv/single_cell_spm_timeseries.csv`
 - `results/plots/single_cell_spm_states.png`
 - `results/plots/single_cell_spm_voltage.png`
 
-The model is intentionally small and transparent. It is the baseline that later pack, balancing, degradation, and hierarchical-computation experiments will extend.
+```bash
+python experiments/verify_pack_invariants.py
+```
+
+This independently checks the saved pack and balancing CSV files for conservation, current decomposition, SOC propagation, and metric consistency.
+
+The model is intentionally small and transparent. It is the baseline that later degradation and hierarchical-computation experiments will extend.
