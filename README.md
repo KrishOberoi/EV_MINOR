@@ -29,7 +29,8 @@ python experiments/experiment_1b_equal_soc_history.py
 
 This controlled experiment keeps initial SOC and total discharge equal while changing pulse order, helping isolate electrochemical memory from SOC imbalance.
 
-The Step 1 script writes:
+The running report is maintained in `REPORT.md`. The requirements comparison with the submitted minor-project document is maintained in `ALIGNMENT.md`.
+
 
 - `results/csv/single_cell_spm_timeseries.csv`
 - `results/plots/single_cell_spm_states.png`
