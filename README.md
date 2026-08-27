@@ -17,7 +17,15 @@ python -m pip install -r requirements.txt
 python experiments/single_cell_spm.py
 ```
 
-The script writes:
+```bash
+python experiments/experiment_1_same_voltage.py
+```
+
+Experiment 1 simulates two cells with different histories, finds a pair within a 2 mV voltage threshold, preserves their full electrochemical states, and compares their usable discharge energy under a common load.
+
+The running report is maintained in `REPORT.md`.
+
+The Step 1 script writes:
 
 - `results/csv/single_cell_spm_timeseries.csv`
 - `results/plots/single_cell_spm_states.png`

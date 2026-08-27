@@ -106,13 +106,38 @@ Experiment 1 supports the central motivation for electrochemical-state-informed 
 
 For the chosen histories, the simulation produced a voltage-matched pair with a 1.848 mV voltage difference but a 16.94 percentage-point SOC difference and a 110.85 mV overpotential difference. This is a strong project result demonstrating hidden state separation. It is a simulation finding under the Chen2020 SPM assumptions, not a claim of general experimental validation or fundamental scientific novelty.
 
-### Remaining part of Experiment 1
+### Usable-energy continuation result
 
-The next addition is a fair usable-energy comparison. The matched electrochemical states should be continued from their full internal state vectors under the same discharge current until a common voltage cutoff. Using only the matched SOC values would erase the concentration-gradient information, so the continuation must preserve the complete PyBaMM state.
+The two matched points were continued from their preserved full PyBaMM state vectors under the same 5 A discharge until the model voltage cutoff of 2.5 V.
+
+| Quantity | Cell A | Cell B | Difference |
+|---|---:|---:|---:|
+| Usable discharge energy | 7.044 Wh | 10.112 Wh | **3.068 Wh** |
+| Discharge duration | 25.71 min | 35.97 min | 10.26 min |
+| Final voltage | 2.500 V | 2.500 V | common cutoff |
+
+At the start of the common discharge, the applied load immediately produced different voltage responses: approximately 3.610 V for Cell A and 3.719 V for Cell B. This reflects the fact that the cells had different internal states even though their pre-discharge terminal voltages were within 2 mV.
+
+### Interpretation and limitation
+
+The energy difference is a useful engineering consequence of the voltage-matched state difference, but it must not be attributed solely to concentration gradients. The selected pair also differed by 16.94 percentage points in SOC, so SOC separation is a major contributor to the 3.068 Wh energy difference. A follow-up controlled experiment should hold SOC nearly equal while varying recent current history, or compare several matched pairs, to isolate the contribution of diffusion gradients and overpotential.
+
+### Updated conclusion
+
+The complete Experiment 1 evidence is now:
+
+1. Two cells can have terminal voltages within 2 mV while their electrochemical state estimates differ substantially.
+2. When the same load is applied, their immediate voltage response, time to cutoff, and usable discharge energy can differ substantially.
+3. Full-state continuation is necessary for this test. Reinitializing only from SOC would discard the concentration profile and would not be a valid test of electrochemical memory.
+
+### Updated project-specific novel finding
+
+Under the stated Chen2020 SPM assumptions and selected histories, a 1.848 mV pre-load voltage difference corresponded to a 3.068 Wh difference in subsequent usable energy under a common 5 A discharge. Because SOC was also different, this is a project-specific demonstration of the limitation of voltage-only classification, not an isolated measurement of diffusion-gradient effects.
 
 ## Updated experiment log
 
 | Date | Experiment | Result | Decision |
 |---|---|---|---|
 | 2026-08-26 | Single-cell SPM baseline | Successful, 456 points, no missing CSV values | Proceed to two-cell history comparison |
-| 2026-08-26 | Experiment 1 voltage-state comparison | 1.848 mV voltage difference with 16.94 percentage-point SOC difference | Proceed to full-state usable-energy comparison |
+| 2026-08-27 | Experiment 1 voltage-state comparison | 1.848 mV voltage difference with 16.94 percentage-point SOC difference | Proceed to full-state usable-energy comparison |
+| 2026-08-27 | Experiment 1 full-state energy continuation | 3.068 Wh usable-energy difference under a common 5 A discharge | Proceed to controlled same-SOC history comparison or 4-cell pack model |

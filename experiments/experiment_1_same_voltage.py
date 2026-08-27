@@ -43,7 +43,9 @@ def as_time_series(values, n_time: Optional[int] = None) -> np.ndarray:
     return array.reshape(-1)
 
 
-def simulate_cell(label: str, initial_soc: float, steps: list[str]) -> pd.DataFrame:
+def simulate_cell(
+    label: str, initial_soc: float, steps: list[str]
+) -> tuple[pd.DataFrame, pybamm.Solution, pybamm.ParameterValues]:
     model = pybamm.lithium_ion.SPM(options={"thermal": "isothermal"})
     parameters = pybamm.ParameterValues("Chen2020")
     experiment = pybamm.Experiment(steps, period="10 seconds")
@@ -117,7 +119,7 @@ def simulate_cell(label: str, initial_soc: float, steps: list[str]) -> pd.DataFr
     )
     soc = initial_soc - signed_capacity_change / capacity_ah
 
-    return pd.DataFrame(
+    data = pd.DataFrame(
         {
             "cell": label,
             "time_s": time_s,
@@ -135,6 +137,52 @@ def simulate_cell(label: str, initial_soc: float, steps: list[str]) -> pd.DataFr
             "total_overpotential_V": positive_eta - negative_eta,
         }
     )
+    return data, solution, parameters
+
+
+def state_at_global_index(solution: pybamm.Solution, global_index: int) -> pybamm.Solution:
+    """Build a one-state Solution from an arbitrary point in an experiment."""
+    remaining = global_index
+    for cycle_index, ys in enumerate(solution.all_ys):
+        if remaining < ys.shape[1]:
+            return pybamm.Solution(
+                [np.array([0.0])],
+                [ys[:, remaining : remaining + 1]],
+                [solution.all_models[cycle_index]],
+                [solution.all_inputs[cycle_index]],
+                termination="final time",
+            )
+        remaining -= ys.shape[1]
+    raise IndexError(f"Global state index {global_index} is outside the solution")
+
+
+def continue_discharge_from_state(
+    solution: pybamm.Solution,
+    global_index: int,
+    parameters: pybamm.ParameterValues,
+) -> tuple[pd.DataFrame, float]:
+    """Discharge from a preserved full internal state until the model cutoff."""
+    snapshot = state_at_global_index(solution, global_index)
+    model = pybamm.lithium_ion.SPM(options={"thermal": "isothermal"})
+    model = model.set_initial_conditions_from(
+        snapshot, inplace=False, return_type="model"
+    )
+    simulation = pybamm.Simulation(
+        model,
+        parameter_values=parameters,
+        solver=pybamm.CasadiSolver(mode="safe"),
+    )
+    time_eval = np.linspace(0.0, 3700.0, 371)
+    discharge = simulation.solve(t_eval=time_eval)
+    time_s = as_time_series(discharge["Time [s]"].entries)
+    voltage = as_time_series(
+        get_variable(discharge, "Voltage [V]", "Terminal voltage [V]"), len(time_s)
+    )
+    current = as_time_series(get_variable(discharge, "Current [A]"), len(time_s))
+    energy_wh = float(np.trapz(voltage * current, time_s) / 3600.0)
+    return pd.DataFrame(
+        {"time_s": time_s, "voltage_V": voltage, "current_A": current}
+    ), energy_wh
 
 
 def find_voltage_match(cell_a: pd.DataFrame, cell_b: pd.DataFrame) -> pd.DataFrame:
@@ -224,7 +272,7 @@ def plot_results(cell_a: pd.DataFrame, cell_b: pd.DataFrame, match: pd.DataFrame
 
 def main() -> None:
     pybamm.set_logging_level("WARNING")
-    cell_a = simulate_cell(
+    cell_a, solution_a, parameters_a = simulate_cell(
         "A",
         0.60,
         [
@@ -236,7 +284,7 @@ def main() -> None:
             "Rest for 10 minutes",
         ],
     )
-    cell_b = simulate_cell(
+    cell_b, solution_b, parameters_b = simulate_cell(
         "B",
         0.65,
         [
@@ -254,6 +302,48 @@ def main() -> None:
     match.to_csv(CSV / "experiment_1_voltage_match.csv", index=False)
     plot_results(cell_a, cell_b, match)
 
+    match_row = match.iloc[0]
+    discharge_a, energy_a_wh = continue_discharge_from_state(
+        solution_a, int(match_row.cell_a_index), parameters_a
+    )
+    discharge_b, energy_b_wh = continue_discharge_from_state(
+        solution_b, int(match_row.cell_b_index), parameters_b
+    )
+    discharge_a["cell"] = "A"
+    discharge_b["cell"] = "B"
+    pd.concat([discharge_a, discharge_b], ignore_index=True).to_csv(
+        CSV / "experiment_1_matched_state_discharges.csv", index=False
+    )
+    energy_summary = pd.DataFrame(
+        [
+            {
+                "cell": "A",
+                "usable_energy_Wh": energy_a_wh,
+                "discharge_duration_s": discharge_a.time_s.iloc[-1],
+                "final_voltage_V": discharge_a.voltage_V.iloc[-1],
+            },
+            {
+                "cell": "B",
+                "usable_energy_Wh": energy_b_wh,
+                "discharge_duration_s": discharge_b.time_s.iloc[-1],
+                "final_voltage_V": discharge_b.voltage_V.iloc[-1],
+            },
+        ]
+    )
+    energy_summary.to_csv(CSV / "experiment_1_usable_energy.csv", index=False)
+
+    fig, ax = plt.subplots(figsize=(11, 6))
+    ax.plot(discharge_a.time_s / 60, discharge_a.voltage_V, label=f"Cell A: {energy_a_wh:.2f} Wh")
+    ax.plot(discharge_b.time_s / 60, discharge_b.voltage_V, label=f"Cell B: {energy_b_wh:.2f} Wh")
+    ax.set_xlabel("Discharge time from matched state [min]")
+    ax.set_ylabel("Voltage [V]")
+    ax.set_title("Usable energy from voltage-matched full electrochemical states")
+    ax.grid(alpha=0.25)
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(PLOTS / "experiment_1_usable_energy.png", dpi=180)
+    plt.close(fig)
+
     row = match.iloc[0]
     print("Experiment 1 completed.")
     print(f"Voltage difference: {row.voltage_difference_mV:.3f} mV")
@@ -261,9 +351,12 @@ def main() -> None:
     print(f"Cell B: {row.cell_b_voltage_V:.4f} V, {row.cell_b_soc * 100:.2f}% SOC at {row.cell_b_time_s / 60:.2f} min")
     print(f"SOC separation: {row.soc_difference_percentage_points:.2f} percentage points")
     print(f"Positive gradient A/B: {row.cell_a_positive_gradient_mol_m3:.2f} / {row.cell_b_positive_gradient_mol_m3:.2f} mol m^-3")
+    print(f"Usable energy A/B: {energy_a_wh:.3f} / {energy_b_wh:.3f} Wh")
     print(f"Saved: {(CSV / 'experiment_1_cell_histories.csv').relative_to(ROOT)}")
     print(f"Saved: {(CSV / 'experiment_1_voltage_match.csv').relative_to(ROOT)}")
+    print(f"Saved: {(CSV / 'experiment_1_usable_energy.csv').relative_to(ROOT)}")
     print(f"Saved: {(PLOTS / 'experiment_1_same_voltage_different_state.png').relative_to(ROOT)}")
+    print(f"Saved: {(PLOTS / 'experiment_1_usable_energy.png').relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
