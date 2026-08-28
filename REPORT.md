@@ -355,6 +355,8 @@ The `matlab/` directory contains three scripts:
 2. `plot_saved_results.m` recreates pack and controller figures from the saved outputs.
 3. `run_reduced_pack_simulation.m` runs a transparent four-cell Thevenin 1-RC model with the same initial heterogeneity and current profile as the Python pack baseline.
 
+The portable preflight `experiments/validate_matlab_contract.py` verifies all three MATLAB entry points, their documented input files, their changed output names, and the runtime limitation text. This contract check passed. It is source and integration evidence only, not MATLAB numerical execution.
+
 The reduced-order MATLAB model is a control-oriented sanity simulation, not an independent SPM, DFN, or degradation validation. Its values must therefore be reported separately from the PyBaMM values. MATLAB is not installed in the current development environment, so these scripts are prepared for execution on a MATLAB-equipped machine and are currently marked as pending execution. The first MATLAB run should check qualitative ordering and conservation before any parameter calibration or quantitative cross-model comparison is attempted.
 
 

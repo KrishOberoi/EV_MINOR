@@ -27,6 +27,12 @@ plot_saved_results
 run_reduced_pack_simulation
 ```
 
+From Python, the portable preflight contract check can be run even when MATLAB is unavailable:
+
+```bash
+python experiments/validate_matlab_contract.py
+```
+
 The first script reads the committed Python CSV artifacts and independently checks:
 
 - common series current,
@@ -43,6 +49,8 @@ The reduced-order simulation uses four heterogeneous Thevenin 1-RC cells with th
 - `results/csv/matlab_reduced_pack_trajectories.csv`
 - `results/csv/matlab_reduced_pack_summary.csv`
 - `results/plots/matlab_reduced_pack.png`
+
+`REQUIREMENTS.md` maps each MATLAB entry point to its inputs, changed outputs, and acceptance status. The Python contract checker verifies that this mapping is present in the source and documentation. It does not replace MATLAB execution.
 
 ## Research reporting rule
 

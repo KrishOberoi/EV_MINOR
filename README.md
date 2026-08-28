@@ -66,6 +66,12 @@ run_reduced_pack_simulation
 
 See [`matlab/README.md`](matlab/README.md) for the model boundary and reporting rules. Do not combine the MATLAB reduced-order numbers with PyBaMM SPM numbers without labelling the model source.
 
+The MATLAB source/output contract can be checked without MATLAB:
+
+```bash
+python experiments/validate_matlab_contract.py
+```
+
 ```bash
 python experiments/observer_cross_validation.py
 ```
