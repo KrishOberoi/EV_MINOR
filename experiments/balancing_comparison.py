@@ -24,9 +24,10 @@ DT_S = 10.0
 CONTROLLERS = ["Uncontrolled", "Voltage", "SOC", "Electrochemical"]
 
 
-def build_reference_pack() -> pd.DataFrame:
+def build_reference_pack(cell_config: Optional[list[dict]] = None) -> pd.DataFrame:
+    cell_config = CELL_CONFIG if cell_config is None else cell_config
     trajectories = []
-    for config in CELL_CONFIG:
+    for config in cell_config:
         trajectory, _ = simulate_cell(config)
         trajectories.append(trajectory)
     return pd.concat(trajectories, ignore_index=True)
@@ -40,8 +41,15 @@ def choose_pair(scores: np.ndarray, threshold: float) -> Optional[tuple[int, int
     return donor, receiver
 
 
-def run_controller(reference: pd.DataFrame, controller: str) -> pd.DataFrame:
-    cells = [config["cell"] for config in CELL_CONFIG]
+def run_controller(
+    reference: pd.DataFrame,
+    controller: str,
+    cell_config: Optional[list[dict]] = None,
+    gradient_weight: float = 0.2,
+    eta_weight: float = 0.1,
+) -> pd.DataFrame:
+    cell_config = CELL_CONFIG if cell_config is None else cell_config
+    cells = [config["cell"] for config in cell_config]
     base = {
         cell: reference[reference.cell == cell].sort_values("time_s").reset_index(drop=True)
         for cell in cells
@@ -84,11 +92,15 @@ def run_controller(reference: pd.DataFrame, controller: str) -> pd.DataFrame:
             pair = choose_pair(voltage, 0.005)
         elif controller == "SOC":
             pair = choose_pair(state_soc, 0.005)
-        elif controller == "Electrochemical":
+        elif controller in {
+            "Electrochemical",
+            "Electrochemical_no_gradient",
+            "Electrochemical_no_overpotential",
+        }:
             score = (
                 (state_soc - state_soc.mean()) / soc_scale
-                + 0.2 * (gradient - gradient.mean()) / gradient_scale
-                + 0.1 * (eta - eta.mean()) / eta_scale
+                + gradient_weight * (gradient - gradient.mean()) / gradient_scale
+                + eta_weight * (eta - eta.mean()) / eta_scale
             )
             pair = choose_pair(score, 0.10)
         else:
@@ -126,7 +138,7 @@ def run_controller(reference: pd.DataFrame, controller: str) -> pd.DataFrame:
         # perturbation is intentionally first-order, making its computational
         # cost representative of a reduced-order controller model.
         if k < n_steps - 1:
-            for i, config in enumerate(CELL_CONFIG):
+            for i, config in enumerate(cell_config):
                 state_soc[i] -= cell_current[i] * step_dt / (3600.0 * config["capacity_ah"])
             extra_positive_gradient += step_dt * (
                 -extra_positive_gradient / 180.0 + 25.0 * balancing_current

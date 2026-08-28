@@ -2,6 +2,8 @@
 
 Step 1 implements a single-cell Single Particle Model (SPM) simulation in PyBaMM.
 
+The balancing-algorithm design is informed by the public Gregory Plett / University of Colorado Boulder course reference documented in [`COURSE_ALIGNMENT.md`](COURSE_ALIGNMENT.md). The course supplies established BMS baselines; the electrochemical score and research evaluation are developed independently here.
+
 ## Setup
 
 ```bash
@@ -42,6 +44,12 @@ python experiments/balancing_comparison.py
 This compares uncontrolled, voltage-based, SOC-based, and electrochemical-state balancing using a control-oriented reduced-order perturbation layer calibrated against the PyBaMM pack reference.
 
 See [`MODEL_SOURCES.md`](MODEL_SOURCES.md) for the exact division between PyBaMM, custom Python, and MATLAB. In particular, the present controller comparison is a reduced-order prototype rather than a closed-loop PyBaMM PDE simulation.
+
+```bash
+python experiments/robustness_ablation.py
+```
+
+This repeats the controller comparison for baseline, SOC-shifted, and capacity/resistance-mismatched packs, then removes the gradient and overpotential terms from the electrochemical score. It is the current test of whether the proposed score is robust or whether its added terms merely add complexity.
 
 ## MATLAB cross-check lane
 

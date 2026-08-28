@@ -46,6 +46,7 @@ The model-source boundary is maintained in `MODEL_SOURCES.md`. PyBaMM reference 
 | Heterogeneous 4S pack | Does cell mismatch create pack-level voltage and SOC spread? | Complete, pre-balancing baseline |
 | Balancing comparison | Which controller reduces imbalance most effectively? | Complete baseline, further repeated scenarios required |
 | Acceptance verification | Do the completed public workflows satisfy their explicit result requirements after a fresh run? | Complete: requirement-traced checker and edge/integration checks passed |
+| Robustness and score ablation | Do electrochemical score terms change controller outcomes across heterogeneity scenarios? | Complete baseline study: terms have observable but non-universal effects |
 | MATLAB cross-check lane | Can saved invariants and pack-level trends be checked in a second environment? | Scripts added, execution pending MATLAB availability |
 | Degradation-aware balancing | Can balancing reduce ageing cost as well as imbalance? | Planned |
 | Hierarchical computation | Can the approach scale with event-triggered updates? | Planned |

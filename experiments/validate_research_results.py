@@ -28,6 +28,7 @@ def main() -> None:
         "single_cell_spm_timeseries.csv",
         "experiment_1_voltage_match.csv",
         "experiment_1_usable_energy.csv",
+        "experiment_1_matched_state_discharges.csv",
         "experiment_1b_equal_soc_voltage_match.csv",
         "four_cell_pack_trajectories.csv",
         "four_cell_pack_summary.csv",
@@ -48,6 +49,7 @@ def main() -> None:
         "balancing_comparison.png",
         "observer_cross_validation.png",
         "spm_spme_comparison.png",
+        "balancing_robustness_ablation.png",
     ]
     for name in required_csv:
         assert (CSV / name).is_file(), f"Missing required CSV: {name}"
@@ -66,13 +68,23 @@ def main() -> None:
 
     match = pd.read_csv(CSV / "experiment_1_voltage_match.csv").iloc[0]
     energy = pd.read_csv(CSV / "experiment_1_usable_energy.csv")
+    discharges = pd.read_csv(CSV / "experiment_1_matched_state_discharges.csv")
     assert_finite(pd.DataFrame([match]), "Experiment 1 voltage match")
     assert_finite(energy, "Experiment 1 energy output")
+    assert_finite(discharges, "Experiment 1 discharge trajectories")
     assert 0 < match.voltage_difference_mV <= 2, "Experiment 1 voltage threshold failed"
     assert match.soc_difference_percentage_points > 1, "Experiment 1 did not separate SOC"
     assert abs(match.cell_a_positive_gradient_mol_m3 - match.cell_b_positive_gradient_mol_m3) > 100, "Experiment 1 did not separate internal gradient"
     assert len(energy) == 2 and (energy.usable_energy_Wh > 0).all(), "Experiment 1 energy output invalid"
     assert abs(energy.usable_energy_Wh.iloc[0] - energy.usable_energy_Wh.iloc[1]) > 1, "Experiment 1 energy difference is too small"
+    for cell, series in discharges.groupby("cell"):
+        series = series.sort_values("time_s")
+        assert len(series) > 2 and np.all(np.diff(series.time_s) > 0), f"Energy time grid invalid for {cell}"
+        assert np.allclose(series.current_A, 5.0), f"Common energy load invalid for {cell}"
+        recomputed = np.trapz(series.voltage_V, series.time_s) * 5.0 / 3600.0
+        reported = energy.loc[energy.cell == cell, "usable_energy_Wh"].iloc[0]
+        assert abs(recomputed - reported) < 1e-9, f"Energy integration mismatch for {cell}"
+        assert abs(series.voltage_V.iloc[-1] - 2.5) < 0.02, f"Cutoff voltage invalid for {cell}"
     print(f"Experiment 1 PASS: {match.voltage_difference_mV:.3f} mV voltage gap, {match.soc_difference_percentage_points:.2f} pp SOC gap, and {abs(energy.usable_energy_Wh.iloc[0] - energy.usable_energy_Wh.iloc[1]):.3f} Wh energy gap.")
 
     controlled = pd.read_csv(CSV / "experiment_1b_equal_soc_voltage_match.csv").iloc[0]
@@ -110,6 +122,28 @@ def main() -> None:
     assert (active.final_soc_spread_percentage_points < uncontrolled).all(), "Active controllers did not reduce final SOC spread"
     assert (metrics.balancing_energy_Wh >= 0).all(), "Balancing energy became negative"
     print(f"Balancing PASS: {len(expected)} controllers, zero-net transfer, and all active controllers below {uncontrolled:.3f} pp uncontrolled final SOC spread.")
+
+    ablation = pd.read_csv(CSV / "balancing_robustness_ablation_metrics.csv")
+    assert_finite(ablation, "balancing robustness and ablation metrics")
+    assert set(ablation.scenario) == {"baseline", "soc_shift", "capacity_resistance"}, "Ablation scenario set changed"
+    expected_labels = {
+        "Uncontrolled",
+        "SOC",
+        "Electrochemical",
+        "Electrochemical_no_gradient",
+        "Electrochemical_no_overpotential",
+        "Electrochemical_SOC_only",
+    }
+    assert set(ablation.controller_label) == expected_labels, "Ablation controller set changed"
+    for scenario, data in ablation.groupby("scenario"):
+        reference_spread = data.loc[data.controller_label == "Uncontrolled", "final_soc_spread_percentage_points"].iloc[0]
+        active = data[data.controller_label != "Uncontrolled"]
+        assert (active.final_soc_spread_percentage_points < reference_spread).all(), f"Ablation failed to improve {scenario}"
+    full = ablation[ablation.controller_label == "Electrochemical"].set_index("scenario").final_soc_spread_percentage_points
+    no_gradient = ablation[ablation.controller_label == "Electrochemical_no_gradient"].set_index("scenario").final_soc_spread_percentage_points
+    no_eta = ablation[ablation.controller_label == "Electrochemical_no_overpotential"].set_index("scenario").final_soc_spread_percentage_points
+    assert ((full - no_gradient).abs() > 1e-9).any() or ((full - no_eta).abs() > 1e-9).any(), "Score ablations had no observable effect"
+    print("Ablation PASS: three heterogeneity scenarios, six controller labels, and observable score-term effects.")
 
     observer = pd.read_csv(CSV / "observer_cross_validation.csv")
     observer_metrics = pd.read_csv(CSV / "observer_validation_metrics.csv")

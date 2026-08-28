@@ -27,6 +27,8 @@ The current defensible contribution is a reproducible simulation study that inte
 
 This should be presented as an **integrated, reproducible minor-project framework** unless a deeper systematic literature review demonstrates a narrower algorithmic gap.
 
+The public Gregory Plett / University of Colorado Boulder Coursera specialization is used as a methodological reference for balancing setpoints, trigger rules, active-balancing architectures, energy estimation, and MATLAB/Octave workflows. It is not treated as evidence that our controller is novel. The source and independence boundary are documented in `COURSE_ALIGNMENT.md`.
+
 ## Candidate novelty claim, pending verification
 
 A potentially defensible narrow contribution is:
@@ -93,5 +95,7 @@ The final report should compare the proposed framework against the criteria used
 - The observer coefficients were calibrated on the same reference trajectory, so this is a baseline cross-check rather than held-out validation. Held-out profiles remain required.
 
 On 2026-08-28, the public Python workflows were rerun and the requirement-traced acceptance checker passed. It verified the completed result thresholds, finite artifacts, required plots, pack/controller conservation, strict time grids, signed charge behaviour, and observer bounds. A real CSV-schema defect in the first version of the checker was found during execution and fixed before the passing rerun. MATLAB runtime validation was attempted but is blocked because neither MATLAB nor Octave is installed locally.
+
+The repeated robustness/ablation run found that the full electrochemical score is not universally superior under the current prototype: the no-gradient variant reached 0.769 percentage points versus 0.927 for the full score in the baseline case, and 2.111 versus 2.166 in the capacity/resistance case. All variants tied at 5.277 percentage points in the SOC-shift case. This negative result narrows the claim and is evidence against presenting the score as automatically beneficial.
 
 The project is aligned with a real research gap, but its novelty is currently in the **integration, controlled evaluation, and reproducibility** rather than a proven entirely new balancing principle. We will narrow or revise the claim if literature or cross-validation shows that the same score and architecture already exist.

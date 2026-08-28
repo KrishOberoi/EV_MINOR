@@ -244,6 +244,12 @@ The initial comparison shows the expected multi-objective trade-off: voltage con
 
 ## Research novelty and cross-verification position
 
+### Course methodology reference
+
+The project uses the public syllabus of Gregory Plett's University of Colorado Boulder Coursera specialization, especially *Battery Pack Balancing and Power Estimation*, as a methodological reference for balancing setpoints, balancing triggers, active-balancing architecture, remaining-energy calculation, and MATLAB/Octave pack simulation. The reference is recorded in `COURSE_ALIGNMENT.md`.
+
+The course establishes the baseline BMS concepts but does not by itself define our research contribution. Our independent layer is the integration of PyBaMM internal electrochemical signals, a custom observer/controller prototype, repeated scenario testing, and planned degradation/computation extensions. Course materials or templates must not be presented as our original algorithm.
+
 ### Literature check
 
 The project does not claim that active balancing, SOC-based balancing, MPC, or degradation-aware balancing is individually novel. Prior work already covers optimization-based active balancing, aging-aware or wear-leveling-aware balancing, and State-of-Power-based balancing. In particular, Fraccaroli et al. study aging-aware active balancing and balancing triggers, while Shreasth et al. (Scientific Reports, 2025) study a SoP-based strategy using a four-cell experiment, UKF estimation, MATLAB/Simulink, and a 96-series architecture.
@@ -318,6 +324,24 @@ The requirement-traced checker `experiments/validate_research_results.py` then p
 Additional integration and edge checks passed: dependency check, imports, Python compilation, local Markdown links, deterministic single-cell rerun, strict timestamps, no duplicate boundaries, signed charge SOC increase, rectangular pack/controller grids, required artifact existence, and CSV finiteness. The acceptance checker initially exposed an incorrect Step 1 column name; this was corrected and the complete checker then passed. This correction is recorded as a positive feedback-loop result rather than hidden.
 
 MATLAB acceptance was attempted through its documented batch interface, but neither MATLAB nor Octave is installed in the current environment. MATLAB runtime results therefore remain externally blocked and are not claimed in this report.
+
+## Robustness and electrochemical-score ablation
+
+To test whether the proposed electrochemical score is more than a hand-selected single-case result, `experiments/robustness_ablation.py` was run on three pack configurations: the baseline pack, a shifted-SOC pack, and a pack with stronger capacity and resistance mismatch. The full score was compared with versions that removed the gradient term, removed the overpotential term, or retained SOC only.
+
+| Scenario | Uncontrolled final SOC spread [pp] | Full score [pp] | No gradient [pp] | No overpotential [pp] |
+|---|---:|---:|---:|---:|
+| Baseline | 9.596 | 0.927 | **0.769** | 0.883 |
+| Capacity/resistance mismatch | 11.090 | 2.166 | **2.111** | **2.111** |
+| SOC shift | 15.596 | **5.277** | **5.277** | **5.277** |
+
+### Observation
+
+All active variants reduced final SOC spread relative to their uncontrolled scenario, but the full SOC/gradient/overpotential score was not the best variant in these tests. The no-gradient variant performed better in the baseline and capacity/resistance cases, while all variants tied in the SOC-shift case.
+
+### Research conclusion
+
+The ablation does **not** verify a universal performance advantage for the combined electrochemical score. It does show that the added terms can change decisions and outcomes, which justifies keeping them as research variables. The defensible claim remains an integrated evaluation framework, not a proven superior algorithm. Weight calibration, held-out profiles, degradation cost, and closed-loop PyBaMM validation are still required.
 
 ## MATLAB cross-validation lane
 
