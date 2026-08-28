@@ -33,6 +33,8 @@ The project distinguishes between:
 
 The current voltage-matched experiments are model-based engineering demonstrations. They support the project motivation but are not presented as experimental validation or as proof of fundamental scientific novelty.
 
+The model-source boundary is maintained in `MODEL_SOURCES.md`. PyBaMM reference states, observer estimates, reduced-order controller outputs, and MATLAB sanity-model outputs must remain separately labelled in research tables and conclusions.
+
 ## Current research sequence
 
 | Stage | Question | Evidence status |

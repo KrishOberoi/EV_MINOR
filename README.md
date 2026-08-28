@@ -41,6 +41,8 @@ python experiments/balancing_comparison.py
 
 This compares uncontrolled, voltage-based, SOC-based, and electrochemical-state balancing using a control-oriented reduced-order perturbation layer calibrated against the PyBaMM pack reference.
 
+See [`MODEL_SOURCES.md`](MODEL_SOURCES.md) for the exact division between PyBaMM, custom Python, and MATLAB. In particular, the present controller comparison is a reduced-order prototype rather than a closed-loop PyBaMM PDE simulation.
+
 ## MATLAB cross-check lane
 
 MATLAB is supplementary rather than a duplicate electrochemical implementation. The Python/PyBaMM SPM remains the reference model. MATLAB provides independent CSV invariant checks, plots, and a transparent 4-cell Thevenin 1-RC sanity simulation.

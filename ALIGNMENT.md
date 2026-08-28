@@ -32,7 +32,9 @@ The report's first objective says that cells can appear identical in terminal vo
 
 ## Important interpretation boundary
 
-The current scripts use internal variables directly from the simulated PyBaMM solution. They are model truth outputs, not estimates reconstructed from measured voltage and current. The report's wording refers to an SPM or simplified-P2D observer, so the next implementation must add an explicit reduced-order observer or clearly label the current results as oracle-state demonstrations.
+The pack and history experiments use internal variables directly from the simulated PyBaMM solution. They are model truth outputs, not estimates reconstructed from measured voltage and current. A prototype SPM-inspired observer now exists, but it remains a separate cross-validation experiment and is not yet the feedback source for the balancing controller. Controller results must therefore state whether they use oracle/model-truth signals or observer estimates.
+
+The source boundary is now recorded in [`MODEL_SOURCES.md`](MODEL_SOURCES.md): PyBaMM supplies the electrochemical reference, custom Python supplies the observer and controller logic, and MATLAB is supplementary. The prototype observer exists, but it has not yet been integrated as the controller's feedback source.
 
 ## MATLAB decision
 

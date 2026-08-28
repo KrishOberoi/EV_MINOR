@@ -236,7 +236,7 @@ The controller layer applied additional currents `u_i` such that the ideal trans
 
 ### Interpretation and limitation
 
-This is a control-oriented reduced-order comparison, not yet a closed-loop re-solve of the full PyBaMM PDE state after every balancing-current action. The PyBaMM pack trajectories provide the reference electrochemical signals, while a first-order perturbation model propagates the effect of `u_i` on SOC, gradient, and overpotential. Therefore, the table demonstrates controller architecture and metric definitions, but it should not yet be presented as definitive proof that the electrochemical controller is superior. The next refinement is to connect the controller to full-state PyBaMM stepping or to a formally derived reduced-order observer.
+This is a control-oriented reduced-order comparison, not yet a closed-loop re-solve of the full PyBaMM PDE state after every balancing-current action. The PyBaMM pack trajectories provide the reference electrochemical signals, while a first-order perturbation model propagates the effect of `u_i` on SOC, gradient, and overpotential. Therefore, the table demonstrates controller architecture and metric definitions, but it should not yet be presented as definitive proof that the electrochemical controller is superior. The next refinement is to drive the controller with observer estimates and cross-check its balancing actions against full-state PyBaMM stepping.
 
 ### Research conclusion
 
@@ -266,7 +266,7 @@ An independent verification script, `experiments/verify_pack_invariants.py`, rec
 
 ### Remaining verification
 
-The controller comparison currently uses a control-oriented perturbation layer calibrated against PyBaMM reference trajectories. It must next be cross-checked against full-state PyBaMM stepping or a formally derived reduced-order observer. We also need SPM-versus-SPMe comparison, timestep sensitivity, controller ablations, and repeated parameter scenarios before making a general performance or novelty claim.
+The controller comparison currently uses a control-oriented perturbation layer calibrated against PyBaMM reference trajectories. Although a prototype observer has now been evaluated separately, it is not yet the feedback source for the balancing controller. The controller must next be cross-checked against full-state PyBaMM stepping with observer-driven feedback. Timestep sensitivity, controller ablations, and repeated parameter scenarios are also required before making a general performance or novelty claim.
 
 ## Observer and model-family cross-validation
 
@@ -303,6 +303,8 @@ The first-order observer coefficients were calibrated from the SPM reference tra
 ## MATLAB cross-validation lane
 
 MATLAB was added as a supplementary analysis environment rather than as a duplicate full electrochemical solver. The Python/PyBaMM SPM remains the reference implementation because it directly provides the particle concentration and electrochemical variables required by the research objectives.
+
+The complete model-source definition is maintained in [`MODEL_SOURCES.md`](MODEL_SOURCES.md). In summary, PyBaMM provides electrochemical reference trajectories; custom Python implements orchestration, observer, controller, metrics, and verification; MATLAB provides a supplementary CSV cross-check and a separate 1-RC sanity simulation.
 
 The `matlab/` directory contains three scripts:
 
