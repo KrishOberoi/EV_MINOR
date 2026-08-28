@@ -300,6 +300,25 @@ This quantifies the approximation introduced by selecting SPM instead of SPMe fo
 
 The first-order observer coefficients were calibrated from the SPM reference trajectory before testing. This is a useful prototype and a transparent baseline, but it is not a fully independent validation. The next observer version should use coefficients identified from separate training profiles and be tested on unseen profiles. A formally derived EKF or UKF should be treated as future work rather than claimed here.
 
+## Acceptance verification of completed stages
+
+The documented public Python workflows were executed again from the repository root on 2026-08-28. All seven commands completed successfully: the single-cell SPM, both hidden-state experiments, the four-cell pack, the balancing comparison, the observer/model-family cross-check, and the independent invariant checker.
+
+The requirement-traced checker `experiments/validate_research_results.py` then passed all completed-stage assertions:
+
+| Stage | Concrete observed check |
+|---|---|
+| Step 1 SPM | 456 finite samples over 75 minutes, dynamic voltage/SOC, and nonzero positive-particle gradient |
+| Experiment 1 | 1.848 mV voltage gap, 16.94 percentage-point SOC gap, and 3.068 Wh energy gap |
+| Controlled history | 0.568 mV voltage gap, 0.556 percentage-point SOC gap, and retained gradient separation |
+| 4-cell pack | Four cells, common-current invariant, 90.71 mV peak spread, and 9.60 percentage-point final SOC spread |
+| Balancing | Four controllers, zero-net transfer, nonnegative energy, and lower final SOC spread for every active controller than uncontrolled |
+| Observer/SPM-SPMe | 3.185 percentage-point SOC RMSE, 14.24 mV voltage RMSE, bounded observer SOC, and finite model-family comparison |
+
+Additional integration and edge checks passed: dependency check, imports, Python compilation, local Markdown links, deterministic single-cell rerun, strict timestamps, no duplicate boundaries, signed charge SOC increase, rectangular pack/controller grids, required artifact existence, and CSV finiteness. The acceptance checker initially exposed an incorrect Step 1 column name; this was corrected and the complete checker then passed. This correction is recorded as a positive feedback-loop result rather than hidden.
+
+MATLAB acceptance was attempted through its documented batch interface, but neither MATLAB nor Octave is installed in the current environment. MATLAB runtime results therefore remain externally blocked and are not claimed in this report.
+
 ## MATLAB cross-validation lane
 
 MATLAB was added as a supplementary analysis environment rather than as a duplicate full electrochemical solver. The Python/PyBaMM SPM remains the reference implementation because it directly provides the particle concentration and electrochemical variables required by the research objectives.

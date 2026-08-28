@@ -92,4 +92,6 @@ The final report should compare the proposed framework against the criteria used
 - SPM versus SPMe voltage RMSE was 34.02 mV and maximum difference was 56.74 mV.
 - The observer coefficients were calibrated on the same reference trajectory, so this is a baseline cross-check rather than held-out validation. Held-out profiles remain required.
 
+On 2026-08-28, the public Python workflows were rerun and the requirement-traced acceptance checker passed. It verified the completed result thresholds, finite artifacts, required plots, pack/controller conservation, strict time grids, signed charge behaviour, and observer bounds. A real CSV-schema defect in the first version of the checker was found during execution and fixed before the passing rerun. MATLAB runtime validation was attempted but is blocked because neither MATLAB nor Octave is installed locally.
+
 The project is aligned with a real research gap, but its novelty is currently in the **integration, controlled evaluation, and reproducibility** rather than a proven entirely new balancing principle. We will narrow or revise the claim if literature or cross-validation shows that the same score and architecture already exist.

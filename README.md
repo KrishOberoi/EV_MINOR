@@ -76,4 +76,10 @@ python experiments/verify_pack_invariants.py
 
 This independently checks the saved pack and balancing CSV files for conservation, current decomposition, SOC propagation, and metric consistency.
 
+```bash
+python experiments/validate_research_results.py
+```
+
+This is the requirement-traced acceptance check for all completed stages. It verifies the Step 1 trajectory, voltage-matched state separation, usable-energy difference, controlled same-SOC history result, heterogeneous pack behaviour, balancing-controller outcomes, observer bounds/errors, SPM/SPMe comparison, required CSVs, and required plots.
+
 The model is intentionally small and transparent. It is the baseline that later degradation and hierarchical-computation experiments will extend.
